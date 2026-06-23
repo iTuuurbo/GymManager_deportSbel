@@ -2,7 +2,8 @@ package com.gym.entity;
 
 public enum EstadoCita {
 
-	PROGRAMADA,
+	PENDIENTE,
+	CONFIRMADA,
 	ATENDIDA,
 	CANCELADA
 }

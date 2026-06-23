@@ -32,9 +32,9 @@ public class Membresia {
 	@Column(name = "fechaFin", nullable = false)
 	private LocalDate fechaFin;
 	//ENUM
-	@Enumerated(EnumType.STRING) // Guarda "ACTIVA", "INACTIVA", "SUSPENDIDA"
+	@Enumerated(EnumType.STRING) // Guarda "ACTIVA", "PROXIMA_A_VENCER", "VENCIDA", "SUSPENDIDA"
 	@Column(name = "estado", nullable = false)
-	private EstadomMembresia estado;
+	private EstadoMembresia estado;
 
 	
 	public Membresia() {
@@ -83,11 +83,11 @@ public class Membresia {
 		this.fechaFin = fechaFin;
 	}
 
-	public EstadomMembresia getEstado() {
+	public EstadoMembresia getEstado() {
 		return estado;
 	}
 
-	public void setEstado(EstadomMembresia estado) {
+	public void setEstado(EstadoMembresia estado) {
 		this.estado = estado;
 	}
 	

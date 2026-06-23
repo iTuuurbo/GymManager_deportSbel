@@ -22,11 +22,11 @@ public class ClaseGrupal {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "idClase")
 	private int idClase;
-	@ManyToOne
-	@JoinColumn(name = "idInstructor", nullable = false)
-	private Instructor idInstructor;
-	@Column(name = "nombres", nullable = false, length = 100)
-	private String nombre;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idInstructor", nullable = false)
+    private Instructor instructor;
+    @Column(name = "nombre", nullable = false, length = 100)
+    private String nombre;
 	@Column(name = "descripcion", length = 250)
 	private String descripcion;
 	@Column(name = "capacidad", nullable = false)
@@ -55,13 +55,13 @@ public class ClaseGrupal {
 		this.idClase = idClase;
 	}
 
-	public Instructor getIdInstructor() {
-		return idInstructor;
-	}
+    public Instructor getInstructor() {
+        return instructor;
+    }
 
-	public void setIdInstructor(Instructor idInstructor) {
-		this.idInstructor = idInstructor;
-	}
+    public void setInstructor(Instructor instructor) {
+        this.instructor = instructor;
+    }
 
 	public String getNombre() {
 		return nombre;

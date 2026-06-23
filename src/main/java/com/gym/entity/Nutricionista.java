@@ -6,7 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -17,9 +17,9 @@ public class Nutricionista {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "idNutricionista")
 	private int idNutricionista;
-	@ManyToOne
-	@JoinColumn(name = "idUsuario", nullable = false, unique = true)
-	private Usuario idUsuario;
+    @OneToOne(optional = false)
+    @JoinColumn(name = "idUsuario", nullable = false, unique = true)
+    private Usuario usuario;
 	@Column(name = "dni", nullable = false, unique = true, length = 8)
 	private String dni;
 	@Column(name = "nombres", nullable = false, length = 100)
@@ -45,13 +45,13 @@ public class Nutricionista {
 		this.idNutricionista = idNutricionista;
 	}
 
-	public Usuario getIdUsuario() {
-		return idUsuario;
-	}
+    public Usuario getUsuario() {
+        return usuario;
+    }
 
-	public void setIdUsuario(Usuario idUsuario) {
-		this.idUsuario = idUsuario;
-	}
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 
 	public String getDni() {
 		return dni;

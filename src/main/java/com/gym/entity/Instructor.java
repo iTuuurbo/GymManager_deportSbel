@@ -6,8 +6,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Table(name = "Instructor")
@@ -17,9 +19,9 @@ public class Instructor {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "idInstructor")
 	private int idInstructor;
-	@ManyToOne
-	@JoinColumn(name = "idUsuario", nullable = false, unique = true)
-	private Usuario idUsuario;
+    @OneToOne(optional = false)
+    @JoinColumn(name = "idUsuario", nullable = false, unique = true)
+    private Usuario usuario;
 	@Column(name = "dni", nullable = false, unique = true, length = 8)
 	private String dni;
 	@Column(name = "nombres", nullable = false, length = 100)
@@ -30,8 +32,9 @@ public class Instructor {
 	private String especialidad;
 	@Column(name = "telefono", length = 15)
 	private String telefono;
-	@Column(name = "estado", columnDefinition = "TINYINT", nullable = false, length = 1)
-	private byte estado;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false, length = 20)
+    private EstadoRegistro estado;
 	
 	public Instructor() {
 		
@@ -45,13 +48,13 @@ public class Instructor {
 		this.idInstructor = idInstructor;
 	}
 
-	public Usuario getIdUsuario() {
-		return idUsuario;
-	}
+    public Usuario getUsuario() {
+        return usuario;
+    }
 
-	public void setIdUsuario(Usuario idUsuario) {
-		this.idUsuario = idUsuario;
-	}
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 
 	public String getDni() {
 		return dni;
@@ -93,13 +96,13 @@ public class Instructor {
 		this.telefono = telefono;
 	}
 
-	public byte getEstado() {
-		return estado;
-	}
+    public EstadoRegistro getEstado() {
+        return estado;
+    }
 
-	public void setEstado(byte estado) {
-		this.estado = estado;
-	}
+    public void setEstado(EstadoRegistro estado) {
+        this.estado = estado;
+    }
 
 	
 	

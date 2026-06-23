@@ -9,6 +9,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "Usuario")
 public class Usuario {
@@ -21,6 +23,7 @@ public class Usuario {
 	private Rol idRol;
 	@Column(name = "username", nullable = false, unique = true, length = 50)
 	private String username;
+	@JsonIgnore // no exponer el password al serializar Usuario en JSON
 	@Column(name = "password", nullable = false, length = 255)
 	private String password;
 	@Column(name = "estado", columnDefinition = "TINYINT", nullable = false, length = 1)

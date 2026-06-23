@@ -1,8 +1,9 @@
 package com.gym.entity;
 
-public enum EstadomMembresia {
-	
+public enum EstadoMembresia {
+
 	ACTIVA,
+	PROXIMA_A_VENCER,
 	VENCIDA,
 	SUSPENDIDA
 
