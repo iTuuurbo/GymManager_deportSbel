@@ -32,15 +32,10 @@ public class ClienteController {
 	public String listar(Model model) {
 		model.addAttribute("clientes", clienteService.listar());
 
-		// Objeto vacio para el formulario del modal (registrar).
-		// Inicializamos el Usuario para poder usar th:field="*{usuario.idUsuario}".
 		Cliente cliente = new Cliente();
-		cliente.setUsuario(new Usuario());
 		cliente.setEstado(EstadoRegistro.ACTIVO);
 		model.addAttribute("cliente", cliente);
 
-		// Combos
-		model.addAttribute("usuarios", clienteService.listarUsuarios());
 		model.addAttribute("estados", EstadoRegistro.values());
 
 		return "cliente/mantClientes";

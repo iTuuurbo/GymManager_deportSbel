@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import com.gym.entity.Asistencia;
 import com.gym.entity.Cliente;
+import com.gym.entity.EstadoMembresia;
+import com.gym.entity.EstadoRegistro;
+import com.gym.entity.Membresia;
 import com.gym.repository.AsistenciaRepository;
 import com.gym.repository.ClienteRepository;
 
@@ -18,6 +21,9 @@ public class AsistenciaServiceImpl implements AsistenciaService {
 
 	@Autowired
 	private ClienteRepository clienteRepository;
+
+	@Autowired
+	private MembresiaService membresiaService;
 
 	@Override
 	public List<Asistencia> listar() {
@@ -31,7 +37,35 @@ public class AsistenciaServiceImpl implements AsistenciaService {
 
 	@Override
 	public void registrar(Asistencia asistencia) {
-		asistencia.setCliente(resolverCliente(asistencia.getCliente()));
+		Cliente cliente = resolverCliente(asistencia.getCliente());
+
+		if (cliente.getEstado() != EstadoRegistro.ACTIVO) {
+			throw new IllegalArgumentException("El cliente esta " + cliente.getEstado() + ". Debe estar ACTIVO para ingresar.");
+		}
+
+		List<Membresia> membresias = membresiaService.listarPorCliente(cliente.getIdCliente());
+		boolean tieneActiva = false;
+		for (Membresia m : membresias) {
+			if (m.getEstado() == EstadoMembresia.ACTIVA) {
+				tieneActiva = true;
+				break;
+			}
+		}
+		if (!tieneActiva) {
+			throw new IllegalArgumentException("El cliente no tiene una membresia ACTIVA. No puede ingresar.");
+		}
+
+		if (asistencia.getHoraSalida() != null && asistencia.getHoraIngreso() != null
+				&& asistencia.getHoraSalida().isBefore(asistencia.getHoraIngreso())) {
+			throw new IllegalArgumentException("La hora de salida no puede ser anterior a la de ingreso.");
+		}
+		for (Asistencia a : asistenciaRepository.findByCliente_IdClienteAndFecha(cliente.getIdCliente(), asistencia.getFecha())) {
+			if (a.getHoraSalida() == null) {
+				throw new IllegalArgumentException("El cliente ya tiene un ingreso abierto hoy (sin salida registrada).");
+			}
+		}
+
+		asistencia.setCliente(cliente);
 		asistenciaRepository.save(asistencia);
 	}
 
@@ -54,7 +88,7 @@ public class AsistenciaServiceImpl implements AsistenciaService {
 
 	@Override
 	public List<Cliente> listarClientes() {
-		return clienteRepository.findAll();
+		return clienteRepository.findByEstado(EstadoRegistro.ACTIVO);
 	}
 
 	private Cliente resolverCliente(Cliente seleccionado) {

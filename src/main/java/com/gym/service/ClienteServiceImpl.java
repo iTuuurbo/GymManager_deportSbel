@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.gym.entity.Cliente;
 import com.gym.entity.EstadoRegistro;
+import com.gym.entity.Rol;
 import com.gym.entity.Usuario;
 import com.gym.repository.ClienteRepository;
 import com.gym.repository.UsuarioRepository;
@@ -21,6 +22,9 @@ public class ClienteServiceImpl implements ClienteService {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 
+	@Autowired
+	private RolService rolService;
+
 	@Override
 	public List<Cliente> listar() {
 		return clienteRepository.findAll();
@@ -33,15 +37,29 @@ public class ClienteServiceImpl implements ClienteService {
 
 	@Override
 	public void registrar(Cliente cliente) {
-		// La entidad no tiene @CreationTimestamp y la columna es NOT NULL,
-		// asi que la fecha de registro se setea aqui al crear.
 		cliente.setFechaRegistro(LocalDateTime.now());
 		if (cliente.getEstado() == null) {
 			cliente.setEstado(EstadoRegistro.ACTIVO);
 		}
-		// Cargamos el Usuario administrado desde la BD para evitar el
-		// "transient instance" al guardar (el form solo trae el id).
-		cliente.setUsuario(resolverUsuario(cliente.getUsuario()));
+
+		Cliente existenteDni = clienteRepository.findByDni(cliente.getDni());
+		if (existenteDni != null) {
+			throw new IllegalArgumentException("Ya existe un cliente con el DNI: " + cliente.getDni());
+		}
+
+		Rol rolCliente = rolService.buscarPorNombre("CLIENTE");
+		if (rolCliente == null) {
+			throw new IllegalArgumentException("No existe el rol CLIENTE en la base de datos.");
+		}
+
+		Usuario nuevo = new Usuario();
+		nuevo.setUsername(cliente.getDni());
+		nuevo.setPassword(cliente.getDni() + "123");
+		nuevo.setEstado((byte) 1);
+		nuevo.setIdRol(rolCliente);
+		usuarioRepository.save(nuevo);
+
+		cliente.setUsuario(nuevo);
 		clienteRepository.save(cliente);
 	}
 
@@ -60,7 +78,12 @@ public class ClienteServiceImpl implements ClienteService {
 		existente.setEmail(cliente.getEmail());
 		existente.setFechaNacimiento(cliente.getFechaNacimiento());
 		existente.setEstado(cliente.getEstado());
-		existente.setUsuario(resolverUsuario(cliente.getUsuario())); // Usuario administrado -> actualiza la FK
+		existente.setDirectorioFotoPerfil(cliente.getDirectorioFotoPerfil());
+
+		Cliente otroDni = clienteRepository.findByDni(cliente.getDni());
+		if (otroDni != null && otroDni.getIdCliente() != cliente.getIdCliente()) {
+			throw new IllegalArgumentException("Ya existe otro cliente con el DNI: " + cliente.getDni());
+		}
 
 		clienteRepository.save(existente);
 	}
@@ -77,20 +100,5 @@ public class ClienteServiceImpl implements ClienteService {
 	@Override
 	public List<Usuario> listarUsuarios() {
 		return usuarioRepository.findAll();
-	}
-
-	/**
-	 * Trae el Usuario administrado desde la BD a partir del id que viene del
-	 * formulario. Si no se selecciono uno (id 0) o no existe, lanza un error
-	 * controlado para mostrar un mensaje al usuario en vez de un 500.
-	 */
-	private Usuario resolverUsuario(Usuario seleccionado) {
-		int idUsuario = (seleccionado != null) ? seleccionado.getIdUsuario() : 0;
-		if (idUsuario == 0) {
-			throw new IllegalArgumentException("Debe seleccionar un usuario.");
-		}
-		return usuarioRepository.findById(idUsuario)
-				.orElseThrow(() -> new IllegalArgumentException(
-						"El usuario seleccionado no existe (id " + idUsuario + ")."));
 	}
 }

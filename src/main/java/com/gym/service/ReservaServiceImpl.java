@@ -8,7 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gym.entity.ClaseGrupal;
 import com.gym.entity.Cliente;
+import com.gym.entity.EstadoGrupal;
+import com.gym.entity.EstadoMembresia;
+import com.gym.entity.EstadoRegistro;
 import com.gym.entity.EstadoReserva;
+import com.gym.entity.Membresia;
 import com.gym.entity.Reserva;
 import com.gym.repository.ClaseGrupalRepository;
 import com.gym.repository.ClienteRepository;
@@ -26,6 +30,9 @@ public class ReservaServiceImpl implements ReservaService {
 	@Autowired
 	private ClienteRepository clienteRepository;
 
+	@Autowired
+	private MembresiaService membresiaService;
+
 	@Override
 	public List<Reserva> listar() {
 		return reservaRepository.findAll();
@@ -39,8 +46,37 @@ public class ReservaServiceImpl implements ReservaService {
 	@Override
 	@Transactional
 	public void registrar(Reserva reserva) {
-		// Carga la clase administrada y valida/descuenta cupo (logica de cupos).
+		Cliente cliente = resolverCliente(reserva.getCliente());
 		ClaseGrupal clase = resolverClase(reserva.getClaseGrupal());
+
+		if (cliente.getEstado() != EstadoRegistro.ACTIVO) {
+			throw new IllegalArgumentException("El cliente esta " + cliente.getEstado() + ". Debe estar ACTIVO para reservar.");
+		}
+
+		if (clase.getEstadoGrupal() != EstadoGrupal.PROGRAMADA) {
+			throw new IllegalArgumentException("La clase no esta PROGRAMADA (esta " + clase.getEstadoGrupal() + "). No se puede reservar.");
+		}
+		if (clase.getFecha().isBefore(java.time.LocalDate.now())) {
+			throw new IllegalArgumentException("No se puede reservar una clase con fecha pasada.");
+		}
+
+		boolean tieneActiva = false;
+		for (Membresia m : membresiaService.listarPorCliente(cliente.getIdCliente())) {
+			if (m.getEstado() == EstadoMembresia.ACTIVA) {
+				tieneActiva = true;
+				break;
+			}
+		}
+		if (!tieneActiva) {
+			throw new IllegalArgumentException("El cliente no tiene una membresia ACTIVA. No puede reservar.");
+		}
+
+		for (Reserva r : reservaRepository.findByClaseGrupal_IdClaseAndCliente_IdCliente(clase.getIdClase(), cliente.getIdCliente())) {
+			if (r.getEstadoReserva() != EstadoReserva.CANCELADA) {
+				throw new IllegalArgumentException("El cliente ya tiene una reserva activa en esta clase.");
+			}
+		}
+
 		if (clase.getCuposDisponibles() <= 0) {
 			throw new IllegalArgumentException("La clase no tiene cupos disponibles.");
 		}
@@ -48,7 +84,7 @@ public class ReservaServiceImpl implements ReservaService {
 		claseGrupalRepository.save(clase);
 
 		reserva.setClaseGrupal(clase);
-		reserva.setCliente(resolverCliente(reserva.getCliente()));
+		reserva.setCliente(cliente);
 		if (reserva.getEstadoReserva() == null) {
 			reserva.setEstadoReserva(EstadoReserva.CONFIRMADA);
 		}
@@ -87,7 +123,7 @@ public class ReservaServiceImpl implements ReservaService {
 
 	@Override
 	public List<Cliente> listarClientes() {
-		return clienteRepository.findAll();
+		return clienteRepository.findByEstado(EstadoRegistro.ACTIVO);
 	}
 
 	private ClaseGrupal resolverClase(ClaseGrupal seleccionada) {

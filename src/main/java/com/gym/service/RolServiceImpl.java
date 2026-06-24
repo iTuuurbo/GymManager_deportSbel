@@ -47,4 +47,9 @@ public class RolServiceImpl implements RolService {
 		rol.setEstado((byte) 0);
 		rolRepository.save(rol);
 	}
+
+	@Override
+	public Rol buscarPorNombre(String nombre) {
+		return rolRepository.findByNombre(nombre);
+	}
 }

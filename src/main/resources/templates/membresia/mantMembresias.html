@@ -18,6 +18,20 @@
     </style>
 </head>
 <body>
+<nav class="navbar bg-white border-bottom px-4 py-2 sticky-top">
+    <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="/">
+        <span class="d-flex align-items-center justify-content-center bg-primary text-white rounded-3" style="width:40px;height:40px;">
+            <span class="material-symbols-outlined">fitness_center</span>
+        </span>
+        <span class="d-flex flex-column lh-1">
+            <span class="fw-bold text-dark">GymControl</span>
+            <small class="text-muted">DeportSbelt</small>
+        </span>
+    </a>
+    <a href="/login" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+        <span class="material-symbols-outlined">logout</span> Cerrar sesion
+    </a>
+</nav>
 <div class="container-fluid py-4">
 
     <div class="d-flex justify-content-between align-items-end mb-3">
@@ -68,12 +82,12 @@
                     <tr><th>#</th><th>Cliente</th><th>Plan</th><th>Inicio</th><th>Vencimiento</th><th>Estado</th><th class="text-end">Acciones</th></tr>
                     </thead>
                     <tbody>
-                    <tr th:each="m : ${membresias}">
-                        <td th:text="${m.idMembresia}">1</td>
+                    <tr th:each="m, iter : ${membresias}">
+                        <td th:text="${iter.count}">1</td>
                         <td class="fw-semibold" th:text="${m.cliente != null ? m.cliente.nombres + ' ' + m.cliente.apellidos : '-'}">Cliente</td>
                         <td th:text="${m.tipoMembresia != null ? m.tipoMembresia.nombre : '-'}">Plan</td>
-                        <td th:text="${m.fechaInicio}">2026-06-01</td>
-                        <td th:text="${m.fechaFin}">2026-07-01</td>
+                        <td th:text="${m.fechaInicio != null ? #temporals.format(m.fechaInicio, 'dd/MM/yyyy') : '-'}">01/06/2026</td>
+                        <td th:text="${m.fechaFin != null ? #temporals.format(m.fechaFin, 'dd/MM/yyyy') : '-'}">01/07/2026</td>
                         <td>
                             <span class="badge rounded-pill"
                                   th:classappend="${m.estado.name() == 'ACTIVA' ? 'bg-success-subtle text-success' : (m.estado.name() == 'VENCIDA' ? 'bg-danger-subtle text-danger' : (m.estado.name() == 'PROXIMA_A_VENCER' ? 'bg-warning-subtle text-warning' : 'bg-secondary-subtle text-secondary'))}"
@@ -185,6 +199,8 @@
         });
         planSel().addEventListener('change', recalcular);
         document.getElementById('fechaInicio').addEventListener('change', recalcular);
+        document.getElementById('modal').addEventListener('hidden.bs.modal', function () { document.getElementById('form').reset(); });
+        setTimeout(function () { document.querySelectorAll('.alert').forEach(function (a) { bootstrap.Alert.getOrCreateInstance(a).close(); }); }, 4000);
     });
 
     function nuevaMembresia() {

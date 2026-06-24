@@ -31,6 +31,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 	@Override
 	public void registrar(Usuario usuario) {
+		Usuario existente = usuarioRepository.findByUsername(usuario.getUsername());
+		if (existente != null) {
+			throw new IllegalArgumentException("Ya existe un usuario con el username: " + usuario.getUsername());
+		}
 		usuario.setIdRol(resolverRol(usuario.getIdRol()));
 		usuarioRepository.save(usuario);
 	}
@@ -63,6 +67,11 @@ public class UsuarioServiceImpl implements UsuarioService {
 	@Override
 	public List<Rol> listarRoles() {
 		return rolRepository.findAll();
+	}
+
+	@Override
+	public Usuario buscarPorUsername(String username) {
+		return usuarioRepository.findByUsername(username);
 	}
 
 	/** Trae el Rol administrado desde la BD (evita el "transient instance"). */

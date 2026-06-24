@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.gym.entity.Cliente;
 import com.gym.entity.EstadoMembresia;
+import com.gym.entity.EstadoRegistro;
 import com.gym.entity.Membresia;
 import com.gym.entity.TipoMembresia;
 import com.gym.repository.ClienteRepository;
@@ -27,7 +28,7 @@ public class MembresiaServiceImpl implements MembresiaService {
 
 	@Override
 	public List<Membresia> listar() {
-		return membresiaRepository.findAll();
+		return actualizarVigencia(membresiaRepository.findAll());
 	}
 
 	@Override
@@ -40,7 +41,24 @@ public class MembresiaServiceImpl implements MembresiaService {
 		if (membresia.getEstado() == null) {
 			membresia.setEstado(EstadoMembresia.ACTIVA);
 		}
-		membresia.setCliente(resolverCliente(membresia.getCliente()));
+		Cliente cliente = resolverCliente(membresia.getCliente());
+
+		if (cliente.getEstado() != EstadoRegistro.ACTIVO) {
+			throw new IllegalArgumentException("El cliente esta " + cliente.getEstado() + ". Reactivelo (ACTIVO) antes de asignarle una membresia.");
+		}
+
+		for (Membresia m : membresiaRepository.findByCliente_IdCliente(cliente.getIdCliente())) {
+			if (m.getEstado() == EstadoMembresia.ACTIVA) {
+				throw new IllegalArgumentException("El cliente ya tiene una membresia ACTIVA. Desactivela o suspendala antes de asignar una nueva.");
+			}
+		}
+
+		if (membresia.getFechaInicio() != null && membresia.getFechaFin() != null
+				&& membresia.getFechaFin().isBefore(membresia.getFechaInicio())) {
+			throw new IllegalArgumentException("La fecha de fin no puede ser anterior a la de inicio.");
+		}
+
+		membresia.setCliente(cliente);
 		membresia.setTipoMembresia(resolverTipoMembresia(membresia.getTipoMembresia()));
 		membresiaRepository.save(membresia);
 	}
@@ -69,12 +87,30 @@ public class MembresiaServiceImpl implements MembresiaService {
 
 	@Override
 	public List<Cliente> listarClientes() {
-		return clienteRepository.findAll();
+		return clienteRepository.findByEstado(EstadoRegistro.ACTIVO);
 	}
 
 	@Override
 	public List<TipoMembresia> listarTiposMembresia() {
 		return tipoMembresiaRepository.findAll();
+	}
+
+	@Override
+	public List<Membresia> listarPorCliente(Integer idCliente) {
+		return actualizarVigencia(membresiaRepository.findByCliente_IdCliente(idCliente));
+	}
+
+	// Recalcula vigencia: marca VENCIDA toda membresia (no suspendida) cuya fechaFin ya paso.
+	private List<Membresia> actualizarVigencia(List<Membresia> lista) {
+		java.time.LocalDate hoy = java.time.LocalDate.now();
+		for (Membresia m : lista) {
+			if (m.getEstado() != EstadoMembresia.SUSPENDIDA && m.getEstado() != EstadoMembresia.VENCIDA
+					&& m.getFechaFin() != null && m.getFechaFin().isBefore(hoy)) {
+				m.setEstado(EstadoMembresia.VENCIDA);
+				membresiaRepository.save(m);
+			}
+		}
+		return lista;
 	}
 
 	private Cliente resolverCliente(Cliente seleccionado) {

@@ -51,6 +51,7 @@ public class InstructorServiceImpl implements InstructorService {
 		existente.setTelefono(instructor.getTelefono());
 		existente.setEstado(instructor.getEstado());
 		existente.setUsuario(resolverUsuario(instructor.getUsuario()));
+		existente.setDirectorioFotoPerfil(instructor.getDirectorioFotoPerfil());
 		instructorRepository.save(existente);
 	}
 

@@ -26,6 +26,11 @@
             <span class="text-muted small">DeportSbelt</span>
         </div>
     </div>
+    <form th:action="@{/logout}" method="post" class="d-flex">
+        <button type="submit" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+            <span class="material-symbols-outlined" style="font-size:1.2rem;">logout</span> Cerrar sesion
+        </button>
+    </form>
 </nav>
 
 <div class="container py-5">

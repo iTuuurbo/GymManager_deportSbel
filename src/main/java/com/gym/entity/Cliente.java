@@ -49,9 +49,19 @@ public class Cliente {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
     private EstadoRegistro estado;
-	
+	@Column(name = "directorioFotoPerfil", length = 255)
+	private String directorioFotoPerfil;
+
 	public Cliente() {
-		
+
+	}
+
+	public String getDirectorioFotoPerfil() {
+		return directorioFotoPerfil;
+	}
+
+	public void setDirectorioFotoPerfil(String directorioFotoPerfil) {
+		this.directorioFotoPerfil = directorioFotoPerfil;
 	}
 
 	public int getIdCliente() {

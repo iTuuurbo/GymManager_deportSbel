@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import com.gym.entity.CitaNutricional;
 import com.gym.entity.Cliente;
 import com.gym.entity.EstadoCita;
+import com.gym.entity.EstadoMembresia;
+import com.gym.entity.EstadoRegistro;
+import com.gym.entity.Membresia;
 import com.gym.entity.Nutricionista;
 import com.gym.repository.CitaNutricionalRepository;
 import com.gym.repository.ClienteRepository;
@@ -25,6 +28,9 @@ public class CitaNutricionalServiceImpl implements CitaNutricionalService {
 	@Autowired
 	private NutricionistaRepository nutricionistaRepository;
 
+	@Autowired
+	private MembresiaService membresiaService;
+
 	@Override
 	public List<CitaNutricional> listar() {
 		return citaRepository.findAll();
@@ -40,8 +46,36 @@ public class CitaNutricionalServiceImpl implements CitaNutricionalService {
 		if (cita.getEstado() == null) {
 			cita.setEstado(EstadoCita.PENDIENTE);
 		}
-		cita.setCliente(resolverCliente(cita.getCliente()));
-		cita.setNutricionista(resolverNutricionista(cita.getNutricionista()));
+		Cliente cliente = resolverCliente(cita.getCliente());
+
+		if (cliente.getEstado() != EstadoRegistro.ACTIVO) {
+			throw new IllegalArgumentException("El cliente esta " + cliente.getEstado() + ". Debe estar ACTIVO para agendar citas.");
+		}
+
+		boolean tieneActiva = false;
+		for (Membresia m : membresiaService.listarPorCliente(cliente.getIdCliente())) {
+			if (m.getEstado() == EstadoMembresia.ACTIVA) {
+				tieneActiva = true;
+				break;
+			}
+		}
+		if (!tieneActiva) {
+			throw new IllegalArgumentException("El cliente no tiene una membresia ACTIVA. No puede agendar citas.");
+		}
+
+		cita.setCliente(cliente);
+		Nutricionista nutri = resolverNutricionista(cita.getNutricionista());
+		cita.setNutricionista(nutri);
+
+		if (cita.getFecha() != null && cita.getFecha().isBefore(java.time.LocalDate.now())) {
+			throw new IllegalArgumentException("No se puede agendar una cita en una fecha pasada.");
+		}
+		for (CitaNutricional c : citaRepository.findByNutricionista_IdNutricionistaAndFecha(nutri.getIdNutricionista(), cita.getFecha())) {
+			if (c.getEstado() != EstadoCita.CANCELADA && c.getHora() != null && c.getHora().equals(cita.getHora())) {
+				throw new IllegalArgumentException("El nutricionista ya tiene una cita a esa hora.");
+			}
+		}
+
 		citaRepository.save(cita);
 	}
 
@@ -69,12 +103,12 @@ public class CitaNutricionalServiceImpl implements CitaNutricionalService {
 
 	@Override
 	public List<Cliente> listarClientes() {
-		return clienteRepository.findAll();
+		return clienteRepository.findByEstado(EstadoRegistro.ACTIVO);
 	}
 
 	@Override
 	public List<Nutricionista> listarNutricionistas() {
-		return nutricionistaRepository.findAll();
+		return nutricionistaRepository.findByEstado((byte) 1);
 	}
 
 	private Cliente resolverCliente(Cliente seleccionado) {
@@ -91,7 +125,11 @@ public class CitaNutricionalServiceImpl implements CitaNutricionalService {
 		if (id == 0) {
 			throw new IllegalArgumentException("Debe seleccionar un nutricionista.");
 		}
-		return nutricionistaRepository.findById(id)
+		Nutricionista nutricionista = nutricionistaRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("El nutricionista no existe (id " + id + ")."));
+		if (nutricionista.getEstado() != 1) {
+			throw new IllegalArgumentException("El nutricionista esta inactivo. Debe estar activo.");
+		}
+		return nutricionista;
 	}
 }

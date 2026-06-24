@@ -47,6 +47,7 @@ public class NutricionistaServiceImpl implements NutricionistaService {
 		existente.setTelefono(nutricionista.getTelefono());
 		existente.setEstado(nutricionista.getEstado());
 		existente.setUsuario(resolverUsuario(nutricionista.getUsuario()));
+		existente.setDirectorioFotoPerfil(nutricionista.getDirectorioFotoPerfil());
 		nutricionistaRepository.save(existente);
 	}
 

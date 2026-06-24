@@ -15,4 +15,6 @@ public interface RolService {
 	void actualizar(Rol rol);
 
 	void desactivar(Integer id); // baja logica: estado = 0
+
+	Rol buscarPorNombre(String nombre);
 }

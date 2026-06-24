@@ -18,4 +18,6 @@ public interface UsuarioService {
 	void desactivar(Integer id); // baja logica: estado = 0
 
 	List<Rol> listarRoles(); // para el dropdown
+
+	Usuario buscarPorUsername(String username);
 }

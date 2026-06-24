@@ -30,6 +30,11 @@ public class CitaNutricional {
 	@Enumerated(EnumType.STRING)
 	private EstadoCita estado;
 	private String observaciones;
+	
+	public CitaNutricional() {
+		
+	}
+	
 	public Integer getIdCita() {
 		return idCita;
 	}

@@ -6,4 +6,5 @@ import com.gym.entity.Rol;
 
 public interface RolRepository extends JpaRepository<Rol, Integer>{
 
+	Rol findByNombre(String nombre);
 }

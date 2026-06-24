@@ -21,4 +21,6 @@ public interface MembresiaService {
 	List<Cliente> listarClientes();
 
 	List<TipoMembresia> listarTiposMembresia();
+
+	List<Membresia> listarPorCliente(Integer idCliente);
 }

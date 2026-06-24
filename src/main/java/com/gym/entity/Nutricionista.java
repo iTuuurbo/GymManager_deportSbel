@@ -32,9 +32,19 @@ public class Nutricionista {
 	private String telefono;
 	@Column(name = "estado", columnDefinition = "TINYINT", nullable = false, length = 1)
 	private byte estado;
-	
+	@Column(name = "directorioFotoPerfil", length = 255)
+	private String directorioFotoPerfil;
+
 	public Nutricionista() {
-		
+
+	}
+
+	public String getDirectorioFotoPerfil() {
+		return directorioFotoPerfil;
+	}
+
+	public void setDirectorioFotoPerfil(String directorioFotoPerfil) {
+		this.directorioFotoPerfil = directorioFotoPerfil;
 	}
 
 	public int getIdNutricionista() {

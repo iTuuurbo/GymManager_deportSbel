@@ -18,6 +18,20 @@
     </style>
 </head>
 <body>
+<nav class="navbar bg-white border-bottom px-4 py-2 sticky-top">
+    <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="/">
+        <span class="d-flex align-items-center justify-content-center bg-primary text-white rounded-3" style="width:40px;height:40px;">
+            <span class="material-symbols-outlined">fitness_center</span>
+        </span>
+        <span class="d-flex flex-column lh-1">
+            <span class="fw-bold text-dark">GymControl</span>
+            <small class="text-muted">DeportSbelt</small>
+        </span>
+    </a>
+    <a href="/login" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+        <span class="material-symbols-outlined">logout</span> Cerrar sesion
+    </a>
+</nav>
 <div class="container-fluid py-4">
 
     <div class="d-flex justify-content-between align-items-end mb-3">
@@ -68,11 +82,11 @@
                     <tr><th>#</th><th>Clase</th><th>Instructor</th><th>Fecha</th><th>Horario</th><th>Cupos</th><th>Estado</th><th class="text-end">Acciones</th></tr>
                     </thead>
                     <tbody>
-                    <tr th:each="c : ${clases}">
-                        <td th:text="${c.idClase}">1</td>
+                    <tr th:each="c, iter : ${clases}">
+                        <td th:text="${iter.count}">1</td>
                         <td class="fw-semibold" th:text="${c.nombre}">Spinning</td>
                         <td th:text="${c.instructor != null ? c.instructor.nombres + ' ' + c.instructor.apellidos : '-'}">Inst</td>
-                        <td th:text="${c.fecha}">2026-06-25</td>
+                        <td th:text="${c.fecha != null ? #temporals.format(c.fecha, 'dd/MM/yyyy') : '-'}">25/06/2026</td>
                         <td th:text="${c.horaInicio + ' - ' + c.horaFin}">07:00 - 08:00</td>
                         <td>
                             <span th:text="${c.cuposDisponibles} + ' / ' + ${c.capacidad}">10 / 20</span>
@@ -176,6 +190,8 @@
             language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json' },
             pageLength: 10, order: [ [3, 'asc'] ], columnDefs: [{ orderable: false, targets: -1 }]
         });
+        document.getElementById('modal').addEventListener('hidden.bs.modal', function () { document.getElementById('form').reset(); });
+        setTimeout(function () { document.querySelectorAll('.alert').forEach(function (a) { bootstrap.Alert.getOrCreateInstance(a).close(); }); }, 4000);
         document.getElementById('capacidad').addEventListener('input', function () {
             if (document.getElementById('idClase').value == 0) {
                 document.getElementById('cuposDisponibles').value = this.value;
