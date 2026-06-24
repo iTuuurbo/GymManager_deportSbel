@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymControl - Planes de Membresia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <style>
+        body { font-family:'Inter',sans-serif; background:#f4f6f9; color:#3a3f47; }
+        .material-symbols-outlined { font-size:1.25rem; line-height:1; vertical-align:middle; }
+        .card { border:1px solid #e7e9ee; }
+        .kpi .ico { width:42px; height:42px; display:flex; align-items:center; justify-content:center; border-radius:10px; }
+        .kpi h3 { font-size:1.5rem; }
+        thead th { font-size:.76rem; text-transform:uppercase; letter-spacing:.03em; color:#6c757d; }
+    </style>
+</head>
+<body>
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-end mb-3">
+        <div>
+            <h4 class="fw-bold mb-0">Planes de Membresia</h4>
+            <span class="text-muted small">Tipos de membresia, duracion y precio</span>
+        </div>
+        <button type="button" class="btn btn-primary d-flex align-items-center gap-1" onclick="nuevoPlan()">
+            <span class="material-symbols-outlined">add</span> Nuevo plan
+        </button>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-4 col-6">
+            <div class="card shadow-sm kpi p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><span class="text-muted small">Planes</span>
+                        <h3 class="fw-bold mb-0" th:text="${#lists.size(tiposMembresia)}">0</h3></div>
+                    <span class="ico bg-primary bg-opacity-10 text-primary"><span class="material-symbols-outlined">loyalty</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-6">
+            <div class="card shadow-sm kpi p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><span class="text-muted small">Activos</span>
+                        <h3 class="fw-bold mb-0 text-success" th:text="${#lists.size(tiposMembresia.?[estado == 1])}">0</h3></div>
+                    <span class="ico bg-success bg-opacity-10 text-success"><span class="material-symbols-outlined">check_circle</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-6">
+            <div class="card shadow-sm kpi p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><span class="text-muted small">Inactivos</span>
+                        <h3 class="fw-bold mb-0 text-secondary" th:text="${#lists.size(tiposMembresia.?[estado == 0])}">0</h3></div>
+                    <span class="ico bg-secondary bg-opacity-10 text-secondary"><span class="material-symbols-outlined">block</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div th:if="${msg}" class="alert alert-success alert-dismissible fade show py-2" role="alert">
+                <span th:text="${msg}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show py-2" role="alert">
+                <span th:text="${error}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle w-100" id="tabla">
+                    <thead class="table-light">
+                    <tr><th>#</th><th>Nombre</th><th>Duracion (dias)</th><th>Precio</th><th>Estado</th><th class="text-end">Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="t : ${tiposMembresia}">
+                        <td th:text="${t.idTipoMembresia}">1</td>
+                        <td class="fw-semibold" th:text="${t.nombre}">Mensual</td>
+                        <td th:text="${t.duracionDias}">30</td>
+                        <td th:text="'S/ ' + ${#numbers.formatDecimal(t.precio,1,2)}">S/ 0.00</td>
+                        <td>
+                            <span class="badge rounded-pill"
+                                  th:classappend="${t.estado == 1 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}"
+                                  th:text="${t.estado == 1 ? 'Activo' : 'Inactivo'}">Activo</span>
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <button type="button" class="btn btn-sm btn-light border" th:onclick="|editar(${t.idTipoMembresia})|" title="Editar">
+                                <span class="material-symbols-outlined text-primary">edit</span>
+                            </button>
+                            <a th:href="@{/gestiontipomembresia/desactivar/{id}(id=${t.idTipoMembresia})}"
+                               class="btn btn-sm btn-light border" title="Desactivar"
+                               onclick="return confirm('¿Desactivar este plan?');">
+                                <span class="material-symbols-outlined text-danger">block</span>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="form" th:action="@{/gestiontipomembresia/registrar}" th:object="${tipoMembresia}" method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h6 class="modal-title" id="tituloModal">Registrar plan</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" th:field="*{idTipoMembresia}">
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Nombre</label>
+                        <input type="text" class="form-control" th:field="*{nombre}" maxlength="50" required>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label small text-muted">Duracion (dias)</label>
+                            <input type="number" min="1" class="form-control" th:field="*{duracionDias}" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-muted">Precio (S/)</label>
+                            <input type="number" step="0.01" min="0" class="form-control" th:field="*{precio}" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small text-muted">Estado</label>
+                            <select class="form-select" th:field="*{estado}" required>
+                                <option value="1">Activo</option>
+                                <option value="0">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const base = '/gestiontipomembresia';
+    let modal;
+    $(function () {
+        modal = new bootstrap.Modal(document.getElementById('modal'));
+        $('#tabla').DataTable({
+            language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json' },
+            pageLength: 10, order: [ [0, 'asc'] ], columnDefs: [{ orderable: false, targets: -1 }]
+        });
+    });
+    function nuevoPlan() {
+        const f = document.getElementById('form');
+        f.reset(); f.action = base + '/registrar';
+        document.getElementById('idTipoMembresia').value = 0;
+        document.getElementById('estado').value = '1';
+        document.getElementById('tituloModal').textContent = 'Registrar plan';
+        modal.show();
+    }
+    function editar(id) {
+        fetch(base + '/buscar/' + id).then(r => r.json()).then(t => {
+            const f = document.getElementById('form');
+            f.action = base + '/actualizar';
+            document.getElementById('idTipoMembresia').value = t.idTipoMembresia;
+            document.getElementById('nombre').value = t.nombre ?? '';
+            document.getElementById('duracionDias').value = t.duracionDias ?? '';
+            document.getElementById('precio').value = t.precio ?? '';
+            document.getElementById('estado').value = t.estado;
+            document.getElementById('tituloModal').textContent = 'Editar plan';
+            modal.show();
+        }).catch(() => alert('No se pudo cargar el plan.'));
+    }
+</script>
+</body>
+</html>
