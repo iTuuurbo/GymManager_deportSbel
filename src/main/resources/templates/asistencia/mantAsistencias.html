@@ -164,7 +164,7 @@
     function nuevaAsistencia() {
         const f = document.getElementById('form');
         f.reset(); f.action = base + '/registrar';
-        document.getElementById('idAsistencia').value = 0;
+        document.getElementById('idAsistencia').value = '';
         document.getElementById('cliente.idCliente').value = '0';
         document.getElementById('tituloModal').textContent = 'Registrar asistencia';
         modal.show();

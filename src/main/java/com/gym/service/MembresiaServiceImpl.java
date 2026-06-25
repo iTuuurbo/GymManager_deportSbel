@@ -92,7 +92,7 @@ public class MembresiaServiceImpl implements MembresiaService {
 
 	@Override
 	public List<TipoMembresia> listarTiposMembresia() {
-		return tipoMembresiaRepository.findAll();
+		return tipoMembresiaRepository.findByEstado((byte) 1);
 	}
 
 	@Override

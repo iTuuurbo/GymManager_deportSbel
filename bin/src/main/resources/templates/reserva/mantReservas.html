@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymControl - Reservas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <style>
+        body { font-family:'Inter',sans-serif; background:#f4f6f9; color:#3a3f47; }
+        .material-symbols-outlined { font-size:1.25rem; line-height:1; vertical-align:middle; }
+        .card { border:1px solid #e7e9ee; }
+        .kpi .ico { width:42px; height:42px; display:flex; align-items:center; justify-content:center; border-radius:10px; }
+        .kpi h3 { font-size:1.5rem; }
+        thead th { font-size:.76rem; text-transform:uppercase; letter-spacing:.03em; color:#6c757d; }
+    </style>
+</head>
+<body>
+<nav class="navbar bg-white border-bottom px-4 py-2 sticky-top">
+    <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="/">
+        <span class="d-flex align-items-center justify-content-center bg-primary text-white rounded-3" style="width:40px;height:40px;">
+            <span class="material-symbols-outlined">fitness_center</span>
+        </span>
+        <span class="d-flex flex-column lh-1">
+            <span class="fw-bold text-dark">GymControl</span>
+            <small class="text-muted">DeportSbelt</small>
+        </span>
+    </a>
+    <a href="/login" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+        <span class="material-symbols-outlined">logout</span> Cerrar sesion
+    </a>
+</nav>
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-end mb-3">
+        <div>
+            <h4 class="fw-bold mb-0">Reservas de Clases</h4>
+            <span class="text-muted small">Vacantes reservadas por los clientes</span>
+        </div>
+        <button type="button" class="btn btn-primary d-flex align-items-center gap-1" onclick="nuevaReserva()">
+            <span class="material-symbols-outlined">add</span> Nueva reserva
+        </button>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm kpi p-3"><div class="d-flex justify-content-between align-items-center">
+                <div><span class="text-muted small">Total</span><h3 class="fw-bold mb-0" th:text="${#lists.size(reservas)}">0</h3></div>
+                <span class="ico bg-primary bg-opacity-10 text-primary"><span class="material-symbols-outlined">bookmark</span></span></div></div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm kpi p-3"><div class="d-flex justify-content-between align-items-center">
+                <div><span class="text-muted small">Confirmadas</span><h3 class="fw-bold mb-0 text-success" th:text="${#lists.size(reservas.?[estadoReserva.name() == 'CONFIRMADA'])}">0</h3></div>
+                <span class="ico bg-success bg-opacity-10 text-success"><span class="material-symbols-outlined">event_available</span></span></div></div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm kpi p-3"><div class="d-flex justify-content-between align-items-center">
+                <div><span class="text-muted small">Lista de espera</span><h3 class="fw-bold mb-0 text-warning" th:text="${#lists.size(reservas.?[estadoReserva.name() == 'LISTA_ESPERA'])}">0</h3></div>
+                <span class="ico bg-warning bg-opacity-10 text-warning"><span class="material-symbols-outlined">hourglass_top</span></span></div></div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm kpi p-3"><div class="d-flex justify-content-between align-items-center">
+                <div><span class="text-muted small">Canceladas</span><h3 class="fw-bold mb-0 text-danger" th:text="${#lists.size(reservas.?[estadoReserva.name() == 'CANCELADA'])}">0</h3></div>
+                <span class="ico bg-danger bg-opacity-10 text-danger"><span class="material-symbols-outlined">cancel</span></span></div></div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div th:if="${msg}" class="alert alert-success alert-dismissible fade show py-2" role="alert">
+                <span th:text="${msg}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show py-2" role="alert">
+                <span th:text="${error}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle w-100" id="tabla">
+                    <thead class="table-light">
+                    <tr><th>#</th><th>Clase</th><th>Cliente</th><th>Fecha reserva</th><th>Estado</th><th class="text-end">Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r, iter : ${reservas}">
+                        <td th:text="${iter.count}">1</td>
+                        <td class="fw-semibold" th:text="${r.claseGrupal != null ? r.claseGrupal.nombre : '-'}">Clase</td>
+                        <td th:text="${r.cliente != null ? r.cliente.nombres + ' ' + r.cliente.apellidos : '-'}">Cliente</td>
+                        <td th:text="${r.fechaReserva != null ? #temporals.format(r.fechaReserva, 'dd/MM/yyyy HH:mm') : '-'}">23/06/2026 10:00</td>
+                        <td>
+                            <span class="badge rounded-pill"
+                                  th:classappend="${r.estadoReserva.name() == 'CONFIRMADA' ? 'bg-success-subtle text-success' : (r.estadoReserva.name() == 'CANCELADA' ? 'bg-danger-subtle text-danger' : (r.estadoReserva.name() == 'LISTA_ESPERA' ? 'bg-warning-subtle text-warning' : 'bg-secondary-subtle text-secondary'))}"
+                                  th:text="${r.estadoReserva}">CONFIRMADA</span>
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <button type="button" class="btn btn-sm btn-light border" th:onclick="|editar(${r.idReserva})|" title="Editar estado">
+                                <span class="material-symbols-outlined text-primary">edit</span>
+                            </button>
+                            <a th:href="@{/gestionreserva/desactivar/{id}(id=${r.idReserva})}"
+                               class="btn btn-sm btn-light border" title="Cancelar"
+                               onclick="return confirm('¿Cancelar esta reserva? Se devolvera el cupo.');">
+                                <span class="material-symbols-outlined text-danger">cancel</span>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="form" th:action="@{/gestionreserva/registrar}" th:object="${reserva}" method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h6 class="modal-title" id="tituloModal">Nueva reserva</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" th:field="*{idReserva}">
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Clase</label>
+                        <select class="form-select" th:field="*{claseGrupal.idClase}" id="claseGrupal.idClase" required>
+                            <option value="0">Seleccione una clase</option>
+                            <option th:each="c : ${clases}" th:value="${c.idClase}"
+                                    th:text="${c.nombre + ' (' + c.fecha + ' ' + c.horaInicio + ') - cupos: ' + c.cuposDisponibles}">Clase</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Cliente</label>
+                        <select class="form-select" th:field="*{cliente.idCliente}" id="cliente.idCliente" required>
+                            <option value="0">Seleccione un cliente</option>
+                            <option th:each="cl : ${clientes}" th:value="${cl.idCliente}" th:text="${cl.nombres + ' ' + cl.apellidos}">Cliente</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Estado</label>
+                        <select class="form-select" th:field="*{estadoReserva}" required>
+                            <option th:each="e : ${estados}" th:value="${e}" th:text="${e}">CONFIRMADA</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const base = '/gestionreserva';
+    let modal;
+    $(function () {
+        modal = new bootstrap.Modal(document.getElementById('modal'));
+        $('#tabla').DataTable({
+            language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json' },
+            pageLength: 10, order: [ [0, 'desc'] ], columnDefs: [{ orderable: false, targets: -1 }]
+        });
+        document.getElementById('modal').addEventListener('hidden.bs.modal', function () { document.getElementById('form').reset(); });
+        setTimeout(function () { document.querySelectorAll('.alert').forEach(function (a) { bootstrap.Alert.getOrCreateInstance(a).close(); }); }, 4000);
+    });
+    function nuevaReserva() {
+        const f = document.getElementById('form');
+        f.reset(); f.action = base + '/registrar';
+        document.getElementById('idReserva').value = 0;
+        document.getElementById('claseGrupal.idClase').value = '0';
+        document.getElementById('cliente.idCliente').value = '0';
+        document.getElementById('estadoReserva').value = 'CONFIRMADA';
+        document.getElementById('tituloModal').textContent = 'Nueva reserva';
+        modal.show();
+    }
+    function editar(id) {
+        fetch(base + '/buscar/' + id).then(r => r.json()).then(rv => {
+            const f = document.getElementById('form');
+            f.action = base + '/actualizar';
+            document.getElementById('idReserva').value = rv.idReserva;
+            document.getElementById('claseGrupal.idClase').value = (rv.claseGrupal && rv.claseGrupal.idClase) ? rv.claseGrupal.idClase : '0';
+            document.getElementById('cliente.idCliente').value = (rv.cliente && rv.cliente.idCliente) ? rv.cliente.idCliente : '0';
+            document.getElementById('estadoReserva').value = rv.estadoReserva ?? 'CONFIRMADA';
+            document.getElementById('tituloModal').textContent = 'Editar reserva';
+            modal.show();
+        }).catch(() => alert('No se pudo cargar la reserva.'));
+    }
+</script>
+</body>
+</html>

@@ -13,11 +13,12 @@ public class TipoMembresiaServiceImpl implements TipoMembresiaService {
 
 	@Autowired
 	private TipoMembresiaRepository tipoMembresiaRepository;
-
+	
 	@Override
 	public List<TipoMembresia> listar() {
 		return tipoMembresiaRepository.findAll();
 	}
+	
 
 	@Override
 	public TipoMembresia buscarPorId(Integer id) {

@@ -22,7 +22,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		if (usuario == null) {
 			throw new UsernameNotFoundException("Usuario no encontrado: " + username);
 		}
-		String rol = usuario.getIdRol() != null ? usuario.getIdRol().getNombre() : "CLIENTE";
+		if (usuario.getEstado() == 0) {
+			throw new UsernameNotFoundException("Usuario inactivo: " + username);
+		}
+		String rol = usuario.getIdRol() != null ? usuario.getIdRol().getNombre() : "SIN_ROL";
 		return User.withUsername(usuario.getUsername())
 				.password(usuario.getPassword())
 				.authorities(new SimpleGrantedAuthority(rol))

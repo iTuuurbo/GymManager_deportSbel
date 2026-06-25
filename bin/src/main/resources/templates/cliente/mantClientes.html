@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymControl - Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <style>
+        body { font-family:'Inter',sans-serif; background:#f4f6f9; color:#3a3f47; }
+        .material-symbols-outlined { font-size:1.25rem; line-height:1; vertical-align:middle; }
+        .card { border:1px solid #e7e9ee; }
+        .kpi .ico { width:42px; height:42px; display:flex; align-items:center; justify-content:center; border-radius:10px; }
+        .kpi h3 { font-size:1.5rem; }
+        thead th { font-size:.76rem; text-transform:uppercase; letter-spacing:.03em; color:#6c757d; }
+    </style>
+</head>
+<body>
+<nav class="navbar bg-white border-bottom px-4 py-2 sticky-top">
+    <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="/">
+        <span class="d-flex align-items-center justify-content-center bg-primary text-white rounded-3" style="width:40px;height:40px;">
+            <span class="material-symbols-outlined">fitness_center</span>
+        </span>
+        <span class="d-flex flex-column lh-1">
+            <span class="fw-bold text-dark">GymControl</span>
+            <small class="text-muted">DeportSbelt</small>
+        </span>
+    </a>
+    <a href="/login" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+        <span class="material-symbols-outlined">logout</span> Cerrar sesion
+    </a>
+</nav>
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-end mb-3">
+        <div>
+            <h4 class="fw-bold mb-0">Gestion de Clientes</h4>
+            <span class="text-muted small">Socios registrados del gimnasio</span>
+        </div>
+        <button type="button" class="btn btn-primary d-flex align-items-center gap-1" onclick="nuevoCliente()">
+            <span class="material-symbols-outlined">person_add</span> Nuevo cliente
+        </button>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm kpi p-3"><div class="d-flex justify-content-between align-items-center">
+                <div><span class="text-muted small">Total</span><h3 class="fw-bold mb-0" th:text="${#lists.size(clientes)}">0</h3></div>
+                <span class="ico bg-primary bg-opacity-10 text-primary"><span class="material-symbols-outlined">group</span></span></div></div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm kpi p-3"><div class="d-flex justify-content-between align-items-center">
+                <div><span class="text-muted small">Activos</span><h3 class="fw-bold mb-0 text-success" th:text="${#lists.size(clientes.?[estado.name() == 'ACTIVO'])}">0</h3></div>
+                <span class="ico bg-success bg-opacity-10 text-success"><span class="material-symbols-outlined">check_circle</span></span></div></div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm kpi p-3"><div class="d-flex justify-content-between align-items-center">
+                <div><span class="text-muted small">Suspendidos</span><h3 class="fw-bold mb-0 text-warning" th:text="${#lists.size(clientes.?[estado.name() == 'SUSPENDIDO'])}">0</h3></div>
+                <span class="ico bg-warning bg-opacity-10 text-warning"><span class="material-symbols-outlined">pause_circle</span></span></div></div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm kpi p-3"><div class="d-flex justify-content-between align-items-center">
+                <div><span class="text-muted small">Inactivos</span><h3 class="fw-bold mb-0 text-secondary" th:text="${#lists.size(clientes.?[estado.name() == 'INACTIVO'])}">0</h3></div>
+                <span class="ico bg-secondary bg-opacity-10 text-secondary"><span class="material-symbols-outlined">block</span></span></div></div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div th:if="${msg}" class="alert alert-success alert-dismissible fade show py-2" role="alert">
+                <span th:text="${msg}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show py-2" role="alert">
+                <span th:text="${error}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle w-100" id="tabla">
+                    <thead class="table-light">
+                    <tr>
+                        <th>#</th><th>DNI</th><th>Nombre completo</th><th>Telefono</th><th>Email</th><th>Usuario</th><th>Estado</th><th class="text-end">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c, iter : ${clientes}">
+                        <td th:text="${iter.count}">1</td>
+                        <td th:text="${c.dni}">00000000</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img th:src="${c.directorioFotoPerfil != null and !c.directorioFotoPerfil.isEmpty() ? c.directorioFotoPerfil : 'https://ui-avatars.com/api/?name=' + c.nombres + '+' + c.apellidos + '&background=0d6efd&color=fff'}"
+                                     class="rounded-circle" width="36" height="36" style="object-fit:cover;" alt="foto">
+                                <span class="fw-semibold" th:text="${c.nombres + ' ' + c.apellidos}">Nombre</span>
+                            </div>
+                        </td>
+                        <td th:text="${c.telefono}">-</td>
+                        <td th:text="${c.email}">-</td>
+                        <td th:text="${c.usuario != null ? c.usuario.username : '-'}">user</td>
+                        <td>
+                            <span class="badge rounded-pill"
+                                  th:classappend="${c.estado.name() == 'ACTIVO' ? 'bg-success-subtle text-success' : (c.estado.name() == 'SUSPENDIDO' ? 'bg-warning-subtle text-warning' : 'bg-secondary-subtle text-secondary')}"
+                                  th:text="${c.estado}">ACTIVO</span>
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <button type="button" class="btn btn-sm btn-light border" th:onclick="|editarCliente(${c.idCliente})|" title="Editar">
+                                <span class="material-symbols-outlined text-primary">edit</span>
+                            </button>
+                            <a th:href="@{/gestioncliente/desactivar/{id}(id=${c.idCliente})}"
+                               class="btn btn-sm btn-light border" title="Desactivar"
+                               onclick="return confirm('¿Desactivar este cliente?');">
+                                <span class="material-symbols-outlined text-danger">person_off</span>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCliente" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formCliente" th:action="@{/gestioncliente/registrar}" th:object="${cliente}" method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h6 class="modal-title" id="tituloModal">Registrar cliente</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" th:field="*{idCliente}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">DNI</label>
+                            <input type="text" class="form-control" th:field="*{dni}" maxlength="8" minlength="8" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Nombres</label>
+                            <input type="text" class="form-control" th:field="*{nombres}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Apellidos</label>
+                            <input type="text" class="form-control" th:field="*{apellidos}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Telefono</label>
+                            <input type="text" class="form-control" th:field="*{telefono}" maxlength="15">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Email</label>
+                            <input type="email" class="form-control" th:field="*{email}" maxlength="120">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Fecha de nacimiento</label>
+                            <input type="date" class="form-control" th:field="*{fechaNacimiento}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Foto de perfil (URL)</label>
+                            <input type="url" class="form-control" th:field="*{directorioFotoPerfil}" placeholder="https://...">
+                            <small class="text-muted">El usuario de acceso se crea solo con el DNI.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Estado</label>
+                            <select class="form-select" th:field="*{estado}" required>
+                                <option th:each="e : ${estados}" th:value="${e}" th:text="${e}">ACTIVO</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const base = '/gestioncliente';
+    let modal;
+    $(function () {
+        modal = new bootstrap.Modal(document.getElementById('modalCliente'));
+        $('#tabla').DataTable({
+            language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json' },
+            pageLength: 10, order: [ [0, 'asc'] ], columnDefs: [{ orderable: false, targets: -1 }]
+        });
+        document.getElementById('modalCliente').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('formCliente').reset();
+        });
+        setTimeout(function () {
+            document.querySelectorAll('.alert').forEach(function (a) { bootstrap.Alert.getOrCreateInstance(a).close(); });
+        }, 4000);
+    });
+
+    function nuevoCliente() {
+        const f = document.getElementById('formCliente');
+        f.reset(); f.action = base + '/registrar';
+        document.getElementById('idCliente').value = 0;
+        document.getElementById('estado').value = 'ACTIVO';
+        document.getElementById('tituloModal').textContent = 'Registrar cliente';
+        modal.show();
+    }
+
+    function editarCliente(id) {
+        fetch(base + '/buscar/' + id).then(r => r.json()).then(c => {
+            const f = document.getElementById('formCliente');
+            f.action = base + '/actualizar';
+            document.getElementById('idCliente').value = c.idCliente;
+            document.getElementById('dni').value = c.dni ?? '';
+            document.getElementById('nombres').value = c.nombres ?? '';
+            document.getElementById('apellidos').value = c.apellidos ?? '';
+            document.getElementById('telefono').value = c.telefono ?? '';
+            document.getElementById('email').value = c.email ?? '';
+            document.getElementById('fechaNacimiento').value = c.fechaNacimiento ?? '';
+            document.getElementById('directorioFotoPerfil').value = c.directorioFotoPerfil ?? '';
+            document.getElementById('estado').value = c.estado ?? 'ACTIVO';
+            document.getElementById('tituloModal').textContent = 'Editar cliente';
+            modal.show();
+        }).catch(() => alert('No se pudo cargar el cliente.'));
+    }
+</script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.gym.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +12,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+	@Autowired
+	private CustomAuthSuccessHandler customAuthSuccessHandler;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -26,7 +30,7 @@ public class SecurityConfig {
 			)
 			.formLogin(form -> form
 				.loginPage("/login")
-				.defaultSuccessUrl("/index")
+				.successHandler(customAuthSuccessHandler)
 				.permitAll()
 			)
 			.logout(logout -> logout

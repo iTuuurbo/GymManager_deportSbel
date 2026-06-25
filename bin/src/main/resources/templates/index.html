@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymControl - DeportSbelt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <style>
+        body { font-family:'Inter',sans-serif; background:#f4f6f9; color:#3a3f47; }
+        .material-symbols-outlined { font-size:1.6rem; line-height:1; }
+        .mod { text-decoration:none; color:inherit; }
+        .mod .card { border:1px solid #e7e9ee; transition:transform .12s ease, box-shadow .12s ease; }
+        .mod .card:hover { transform:translateY(-3px); box-shadow:0 .5rem 1rem rgba(0,0,0,.08)!important; }
+        .mod .ico { width:48px; height:48px; display:flex; align-items:center; justify-content:center; border-radius:12px; }
+        .brand { width:46px; height:46px; display:flex; align-items:center; justify-content:center; border-radius:12px; }
+    </style>
+</head>
+<body>
+<nav class="navbar bg-white border-bottom px-4 py-3">
+    <div class="d-flex align-items-center gap-2">
+        <span class="brand bg-primary text-white"><span class="material-symbols-outlined">fitness_center</span></span>
+        <div>
+            <span class="fw-bold d-block lh-1">GymControl</span>
+            <span class="text-muted small">DeportSbelt</span>
+        </div>
+    </div>
+    <form th:action="@{/logout}" method="post" class="d-flex">
+        <button type="submit" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+            <span class="material-symbols-outlined" style="font-size:1.2rem;">logout</span> Cerrar sesion
+        </button>
+    </form>
+</nav>
+
+<div class="container py-5">
+    <div class="mb-4">
+        <h3 class="fw-bold mb-1">Panel de administracion</h3>
+        <p class="text-muted mb-0">Seleccione un modulo para gestionar la informacion del gimnasio.</p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestioncliente/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-primary bg-opacity-10 text-primary"><span class="material-symbols-outlined">group</span></span>
+                    <div><span class="fw-semibold d-block">Clientes</span><span class="text-muted small">Registro y membresias</span></div>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestionmembresia/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-success bg-opacity-10 text-success"><span class="material-symbols-outlined">add_card</span></span>
+                    <div><span class="fw-semibold d-block">Membresias</span><span class="text-muted small">Asignar y renovar planes</span></div>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestiontipomembresia/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-success bg-opacity-10 text-success"><span class="material-symbols-outlined">loyalty</span></span>
+                    <div><span class="fw-semibold d-block">Planes</span><span class="text-muted small">Tipos de membresia</span></div>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestioninstructor/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-info bg-opacity-10 text-info"><span class="material-symbols-outlined">sports</span></span>
+                    <div><span class="fw-semibold d-block">Instructores</span><span class="text-muted small">Personal de clases</span></div>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestionnutricionista/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-info bg-opacity-10 text-info"><span class="material-symbols-outlined">nutrition</span></span>
+                    <div><span class="fw-semibold d-block">Nutricionistas</span><span class="text-muted small">Personal nutricional</span></div>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestionclase/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-warning bg-opacity-10 text-warning"><span class="material-symbols-outlined">exercise</span></span>
+                    <div><span class="fw-semibold d-block">Clases grupales</span><span class="text-muted small">Horarios y cupos</span></div>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestionreserva/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-warning bg-opacity-10 text-warning"><span class="material-symbols-outlined">bookmark</span></span>
+                    <div><span class="fw-semibold d-block">Reservas</span><span class="text-muted small">Vacantes en clases</span></div>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestionasistencia/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-secondary bg-opacity-10 text-secondary"><span class="material-symbols-outlined">fact_check</span></span>
+                    <div><span class="fw-semibold d-block">Asistencias</span><span class="text-muted small">Ingresos y salidas</span></div>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestioncita/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-primary bg-opacity-10 text-primary"><span class="material-symbols-outlined">event</span></span>
+                    <div><span class="fw-semibold d-block">Citas nutricionales</span><span class="text-muted small">Agenda de nutricion</span></div>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestionusuario/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-dark bg-opacity-10 text-dark"><span class="material-symbols-outlined">manage_accounts</span></span>
+                    <div><span class="fw-semibold d-block">Usuarios</span><span class="text-muted small">Cuentas de acceso</span></div>
+                </div></div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <a class="mod" th:href="@{/gestionrol/lista}">
+                <div class="card shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+                    <span class="ico bg-dark bg-opacity-10 text-dark"><span class="material-symbols-outlined">admin_panel_settings</span></span>
+                    <div><span class="fw-semibold d-block">Roles</span><span class="text-muted small">Permisos del sistema</span></div>
+                </div></div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

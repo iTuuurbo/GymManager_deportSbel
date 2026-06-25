@@ -15,7 +15,7 @@ public interface AsistenciaService {
 
 	void actualizar(Asistencia asistencia);
 
-	void eliminar(Integer id); // Asistencia no tiene estado -> borrado fisico
+	void eliminar(Integer id); 
 
 	List<Cliente> listarClientes();
 }

@@ -103,7 +103,7 @@ public class CitaNutricionalServiceImpl implements CitaNutricionalService {
 
 	@Override
 	public List<Cliente> listarClientes() {
-		return clienteRepository.findByEstado(EstadoRegistro.ACTIVO);
+		return clienteRepository.findClientesActivosConMembresiaActiva();
 	}
 
 	@Override

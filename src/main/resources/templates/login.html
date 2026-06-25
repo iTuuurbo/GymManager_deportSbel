@@ -28,6 +28,9 @@
                     <div th:if="${param.error}" class="alert alert-danger py-2 small" role="alert">
                         Usuario o clave incorrectos.
                     </div>
+                    <div th:if="${param.sinacceso}" class="alert alert-warning py-2 small" role="alert">
+                        No tienes permiso para acceder al sistema.
+                    </div>
                     <div th:if="${param.logout}" class="alert alert-success py-2 small" role="alert">
                         Sesion cerrada correctamente.
                     </div>

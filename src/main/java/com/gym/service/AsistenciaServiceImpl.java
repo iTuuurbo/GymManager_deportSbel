@@ -9,9 +9,9 @@ import com.gym.entity.Asistencia;
 import com.gym.entity.Cliente;
 import com.gym.entity.EstadoMembresia;
 import com.gym.entity.EstadoRegistro;
-import com.gym.entity.Membresia;
 import com.gym.repository.AsistenciaRepository;
 import com.gym.repository.ClienteRepository;
+import com.gym.repository.MembresiaRepository;
 
 @Service
 public class AsistenciaServiceImpl implements AsistenciaService {
@@ -23,7 +23,7 @@ public class AsistenciaServiceImpl implements AsistenciaService {
 	private ClienteRepository clienteRepository;
 
 	@Autowired
-	private MembresiaService membresiaService;
+	private MembresiaRepository membresiaRepository;
 
 	@Override
 	public List<Asistencia> listar() {
@@ -43,15 +43,7 @@ public class AsistenciaServiceImpl implements AsistenciaService {
 			throw new IllegalArgumentException("El cliente esta " + cliente.getEstado() + ". Debe estar ACTIVO para ingresar.");
 		}
 
-		List<Membresia> membresias = membresiaService.listarPorCliente(cliente.getIdCliente());
-		boolean tieneActiva = false;
-		for (Membresia m : membresias) {
-			if (m.getEstado() == EstadoMembresia.ACTIVA) {
-				tieneActiva = true;
-				break;
-			}
-		}
-		if (!tieneActiva) {
+		if (!membresiaRepository.existsByCliente_IdClienteAndEstado(cliente.getIdCliente(), EstadoMembresia.ACTIVA)) {
 			throw new IllegalArgumentException("El cliente no tiene una membresia ACTIVA. No puede ingresar.");
 		}
 
@@ -88,7 +80,7 @@ public class AsistenciaServiceImpl implements AsistenciaService {
 
 	@Override
 	public List<Cliente> listarClientes() {
-		return clienteRepository.findByEstado(EstadoRegistro.ACTIVO);
+		return clienteRepository.findClientesActivosConMembresiaActiva();
 	}
 
 	private Cliente resolverCliente(Cliente seleccionado) {

@@ -118,12 +118,12 @@ public class ReservaServiceImpl implements ReservaService {
 
 	@Override
 	public List<ClaseGrupal> listarClases() {
-		return claseGrupalRepository.findAll();
+		return claseGrupalRepository.findByEstadoGrupal(EstadoGrupal.PROGRAMADA);
 	}
 
 	@Override
 	public List<Cliente> listarClientes() {
-		return clienteRepository.findByEstado(EstadoRegistro.ACTIVO);
+		return clienteRepository.findClientesActivosConMembresiaActiva();
 	}
 
 	private ClaseGrupal resolverClase(ClaseGrupal seleccionada) {
